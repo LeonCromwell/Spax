@@ -45,6 +45,10 @@
 </head>
 
 <body>
+    <?php
+    session_start();
+    ?>
+
     <div class='card content py-4 py-xl-5 '>
         <h1>Đăng Nhập</h1>
         <form method="post">
@@ -73,8 +77,9 @@
         </form>
 
         <?php
-        if (isset($_COOKIE['email'])) {
-            setcookie('email', '', time() - 3600, '/');
+
+        if (isset($_SESSION['current_user_email'])) {
+            $_SESSION['current_user_email'] = '';
         }
 
         //connect to db
@@ -122,7 +127,8 @@
                 if (ValidateEmail($email)) {
                     if (CheckPassword($password, $connect)) {
                         echo 'Đăng nhập thành công';
-                        setcookie('email', $email, time() + 3600, '/');
+                        // setcookie('email', $email, time() + 3600, '/');
+                        $_SESSION['current_user_email'] = $email;
                         header('Location: ../Home');
                     } else {
                         echo 'Sai mật khẩu';

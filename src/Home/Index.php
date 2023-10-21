@@ -106,12 +106,22 @@
 
 <body>
     <?php
-    if (!isset($_COOKIE['email']) || empty($_COOKIE['email'])) {
+    session_start();
+    //handle detail when click quizz
+    if (isset($_GET['btn'])) {
+        $quizzkey = $_GET['quizzkey'];
+        $_SESSION['quizzkey'] = $quizzkey;
+        header('Location: ../Quizz/Quizz.php');
+
+    }
+    if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_email'])) {
         header('Location: ../Login/Login.php');
         exit;
     }
-    echo $_COOKIE['quizzkey'];
 
+    // echo $_SESSION['quizzkey'];
+    // echo $_SESSION['current_user_email'];
+    
     //Connect db
     $servername = "localhost";
     $dbname = 'php';
@@ -126,7 +136,7 @@
     }
 
     //get current user
-    $current_user_email = $_COOKIE['email'];
+    $current_user_email = $_SESSION['current_user_email'];
     $st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
     $st->execute();
     $current_user = $st->fetch(PDO::FETCH_ASSOC);
@@ -224,34 +234,23 @@
                     <div class='col-sm-6 col-lg-4 mt-4'>
                     <form method='GET'>
                     <input type='hidden' name='quizzkey' value='" . $quizz['id'] . "'>
+                    <button type='submit' name='btn' class='btn'>
+
                       <div class='card' style='width: 18rem'>
                         <!-- <a href=''>
                       <img src='' class='card-img-top' alt='...' />
                   </a> -->
                         <div class='card-body'>
-                          <button type='submit' name='btn' class='btn'>
 
                               <h5 class='card-title'>" . $quizz['name'] . "</h5>
                            
-                          </button>
                           <p>Level: " . $quizz['level'] . "</p>
                           <p class='card-text card-desc'>" . $quizz['desc'] . "</p>
-                          <a href='#'
-                            >Làm bài<svg
-                              class='bi bi-arrow-right'
-                              xmlns='http://www.w3.org/2000/svg'
-                              width='1em'
-                              height='1em'
-                              fill='currentColor'
-                              viewBox='0 0 16 16'
-                            >
-                              <path
-                                fill-rule='evenodd'
-                                d='M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z'
-                              ></path></svg
-                          ></a>
+                         
                         </div>
                       </div>
+                      </button>
+
                     </form>
                   </div>
                     ";
@@ -259,13 +258,7 @@
 
 
 
-                //handle detail when click quizz
-                if (isset($_GET['btn'])) {
-                    $quizzkey = $_GET['quizzkey'];
-                    // echo $quizzkey;
-                    setcookie('quizzkey', $quizzkey, time() + 3600);
-                    header('Location: ../Quizz/Quizz.php');
-                }
+
 
                 ?>
 
