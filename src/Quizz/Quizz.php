@@ -115,8 +115,34 @@
         <div class='container py-4 py-xl-5'>
 
             <div class="card">
-                <div class="card-header text-center">
+                <?php
+                // Giá trị thời gian từ cơ sở dữ liệu
+                $thoi_gian_database = "02:15:00.000000";
 
+                // Tách thành các thành phần thời gian
+                list($gio, $phut, $giay, $microgiay) = sscanf($thoi_gian_database, "%d:%d:%d.%d");
+
+                // Lấy thời gian hiện tại
+                $thoi_gian_hien_tai = microtime(true);
+
+                // Chuyển đổi giá trị thời gian hiện tại thành giờ, phút, giây và microgiây
+                $gio_hien_tai = date('H', $thoi_gian_hien_tai);
+                $phut_hien_tai = date('i', $thoi_gian_hien_tai);
+                $giay_hien_tai = date('s', $thoi_gian_hien_tai);
+                $microgiay_hien_tai = (int) (($thoi_gian_hien_tai - (int) $thoi_gian_hien_tai) * 1000000);
+
+                // Tính khoảng thời gian còn lại
+                $gio_con_lai = $gio - $gio_hien_tai;
+                $phut_con_lai = $phut - $phut_hien_tai;
+                $giay_con_lai = $giay - $giay_hien_tai;
+                $microgiay_con_lai = $microgiay - $microgiay_hien_tai;
+
+                // Hiển thị thời gian đếm ngược
+                echo sprintf("%02d:%02d:%02d.%06d", $gio_con_lai, $phut_con_lai, $giay_con_lai, $microgiay_con_lai);
+
+
+                ?>
+                <div class="card-body text-center">
                     <?php
                     $quizzKey = $_SESSION['quizzkey'];
                     $quizz = $connect->prepare("SELECT * FROM quizz WHERE id = '$quizzKey'");
@@ -124,8 +150,6 @@
                     $quizz = $quizz->fetch(PDO::FETCH_ASSOC);
                     echo "<h1>" . $quizz['name'] . "</h1>";
                     ?>
-                </div>
-                <div class="card-body text-center">
                     <p>Thời gian: &nbsp;
                         <?php
                         if (isset($quizz['time'])) {
@@ -133,50 +157,54 @@
                         }
                         ?>
                     </p>
-                    <a href="#" class="btn btn-primary">Bắt đầu làm bài</a>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#quizz">Bắt
+                        đầu làm bài</button>
                     <?php
                     if (isset($current_user['role']) && $current_user['role'] == 'admin') {
                         echo " <a href='#' class='btn btn-primary'>Thêm Câu hỏi</a>";
                     }
                     ?>
 
+
+                    <?php
+                    // lấy danh sách các câu hỏi của quizz 
+                    
+                    $ques = $connect->prepare("SELECT * FROM question WHERE ma_khoa_hoc = '$quizzKey'");
+                    $ques->execute();
+                    $questions = $ques->fetchAll(PDO::FETCH_ASSOC);
+
+                    //lấy list đáp án của từng câu hỏi
+                    foreach ($questions as $key => $question) {
+                        // echo $key;
+                        // echo $question['ques'];
+                        $question_id = $question['id'];
+                        $ans = $connect->prepare("SELECT * FROM answer WHERE ma_cau_hoi = '$question_id'");
+                        $ans->execute();
+                        $answers = $ans->fetchAll(PDO::FETCH_ASSOC);
+
+                        echo "
+                            <div class='card collapse' id='quizz'>
+                            <div class='card-header'>Câu " . $key + 1 . "</div>
+                            <div class='card-body'>
+                            <h5 class='card-title'>" . $question['ques'] . "</h5>
+                            <p class='card-text'>";
+                        foreach ($answers as $key => $answer) {
+                            echo $answer['noi_dung'];
+                        }
+                        echo "</p>
+                            <a href='#' class='btn btn-primary'>Go somewhere</a>
+                            </div>
+                        </div>
+                            ";
+                    }
+
+                    ?>
+
                 </div>
             </div>
 
 
-            <?php
-            // lấy danh sách các câu hỏi của quizz 
-            
-            $ques = $connect->prepare("SELECT * FROM question WHERE ma_khoa_hoc = '$quizzKey'");
-            $ques->execute();
-            $questions = $ques->fetchAll(PDO::FETCH_ASSOC);
 
-            //lấy list đáp án của từng câu hỏi
-            foreach ($questions as $key => $question) {
-                // echo $key;
-                // echo $question['ques'];
-                $question_id = $question['id'];
-                $ans = $connect->prepare("SELECT * FROM answer WHERE ma_cau_hoi = '$question_id'");
-                $ans->execute();
-                $answers = $ans->fetchAll(PDO::FETCH_ASSOC);
-
-                echo "
-            <div class='card'>
-            <div class='card-header'>Câu " . $key + 1 . "</div>
-            <div class='card-body'>
-              <h5 class='card-title'>" . $question['ques'] . "</h5>
-              <p class='card-text'>";
-                foreach ($answers as $key => $answer) {
-                    echo $answer['noi_dung'];
-                }
-                echo "</p>
-              <a href='#' class='btn btn-primary'>Go somewhere</a>
-            </div>
-          </div>
-            ";
-            }
-
-            ?>
         </div>
 
     </div>
