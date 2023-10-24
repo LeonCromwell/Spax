@@ -101,6 +101,11 @@
             overflow-y: hidden;
             overflow-wrap: break-word;
         }
+
+        .card:hover {
+            background-color: rgb(248, 249, 250);
+            ;
+        }
     </style>
 </head>
 

@@ -13,7 +13,9 @@
     <script src="https://kit.fontawesome.com/772918bb67.js" crossorigin="anonymous"></script>
     <title>Quizz</title>
     <style>
-
+        .item {
+            text-align: left;
+        }
     </style>
 </head>
 
@@ -115,33 +117,7 @@
         <div class='container py-4 py-xl-5'>
 
             <div class="card">
-                <?php
-                // Giá trị thời gian từ cơ sở dữ liệu
-                $thoi_gian_database = "02:15:00.000000";
 
-                // Tách thành các thành phần thời gian
-                list($gio, $phut, $giay, $microgiay) = sscanf($thoi_gian_database, "%d:%d:%d.%d");
-
-                // Lấy thời gian hiện tại
-                $thoi_gian_hien_tai = microtime(true);
-
-                // Chuyển đổi giá trị thời gian hiện tại thành giờ, phút, giây và microgiây
-                $gio_hien_tai = date('H', $thoi_gian_hien_tai);
-                $phut_hien_tai = date('i', $thoi_gian_hien_tai);
-                $giay_hien_tai = date('s', $thoi_gian_hien_tai);
-                $microgiay_hien_tai = (int) (($thoi_gian_hien_tai - (int) $thoi_gian_hien_tai) * 1000000);
-
-                // Tính khoảng thời gian còn lại
-                $gio_con_lai = $gio - $gio_hien_tai;
-                $phut_con_lai = $phut - $phut_hien_tai;
-                $giay_con_lai = $giay - $giay_hien_tai;
-                $microgiay_con_lai = $microgiay - $microgiay_hien_tai;
-
-                // Hiển thị thời gian đếm ngược
-                echo sprintf("%02d:%02d:%02d.%06d", $gio_con_lai, $phut_con_lai, $giay_con_lai, $microgiay_con_lai);
-
-
-                ?>
                 <div class="card-body text-center">
                     <?php
                     $quizzKey = $_SESSION['quizzkey'];
@@ -151,17 +127,53 @@
                     echo "<h1>" . $quizz['name'] . "</h1>";
                     ?>
                     <p>Thời gian: &nbsp;
-                        <?php
-                        if (isset($quizz['time'])) {
-                            echo $quizz['time'];
-                        }
-                        ?>
+                    <div id="countdown"></div>
+
+
+
+
                     </p>
-                    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#quizz">Bắt
+
+                    <button class="btn btn-primary" id="startCountDown" type="submit" data-bs-toggle="collapse"
+                        data-bs-target="#quizz">Bắt
                         đầu làm bài</button>
+
+                    <?php
+                    // khi ấn vào button startCountDown thì thời gian bắt đầu đếm ngược
+                    //sử dụng js vì php phải refresh lại trang rất nhiều lần
+                    $minutes = $quizz['time'];
+
+                    echo <<<EOD
+                        <script type="text/javascript">
+                            var duration = $minutes * 60 * 1000; // 15 phút trong mili giây
+                            var countDownBtn = document.getElementById("startCountDown");
+                            var x;
+                            countDownBtn.addEventListener("click", e => {
+                            e.preventDefault();
+
+                            var startTime = new Date().getTime();
+                            if(x) clearInterval(x);
+                            x = setInterval(function() {
+                                var now = new Date().getTime();
+                                var distance = startTime + duration - now;
+                                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                                document.getElementById("countdown").innerHTML = minutes + "m " + seconds + "s ";
+                                if (distance <= 0) {
+                                    clearInterval(x);
+                                    document.getElementById("countdown").innerHTML = "Hết thời gian!";
+                                    document.getElementById("countdown").setAttribute("class", "text-danger");
+                                }
+                            }, 1000);
+                        });
+                        </script>
+                        EOD;
+
+                    ?>
+
                     <?php
                     if (isset($current_user['role']) && $current_user['role'] == 'admin') {
-                        echo " <a href='#' class='btn btn-primary'>Thêm Câu hỏi</a>";
+                        echo " <a href='#' class='btn btn-primary' data-bs-toggle='collapse' data-bs-target='#quizz'>Thêm Câu hỏi</a>";
                     }
                     ?>
 
@@ -175,24 +187,34 @@
 
                     //lấy list đáp án của từng câu hỏi
                     foreach ($questions as $key => $question) {
-                        // echo $key;
-                        // echo $question['ques'];
                         $question_id = $question['id'];
                         $ans = $connect->prepare("SELECT * FROM answer WHERE ma_cau_hoi = '$question_id'");
                         $ans->execute();
                         $answers = $ans->fetchAll(PDO::FETCH_ASSOC);
 
                         echo "
-                            <div class='card collapse' id='quizz'>
+                            <div class='card collapse mt-5 item' id='quizz'>
                             <div class='card-header'>Câu " . $key + 1 . "</div>
                             <div class='card-body'>
+                            ";
+                        if (isset($question['image']) && !empty($question['image'])) {
+                            echo "<img src='" . $question['image'] . "' class='card-img-top' alt='Câu " . $key + 1 . "'>";
+                        }
+                        echo "
                             <h5 class='card-title'>" . $question['ques'] . "</h5>
                             <p class='card-text'>";
                         foreach ($answers as $key => $answer) {
-                            echo $answer['noi_dung'];
+                            echo "
+                            <div class='form-check'>
+                            <input class='form-check-input' type='radio' name='flexRadioDefault' id='flexRadioDefault1'>
+                            <label class='form-check-label' for='flexRadioDefault1'>
+                              " . $answer['noi_dung'] . "
+                            </label>
+                          </div>
+                            ";
                         }
                         echo "</p>
-                            <a href='#' class='btn btn-primary'>Go somewhere</a>
+                           
                             </div>
                         </div>
                             ";
