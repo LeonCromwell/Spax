@@ -145,8 +145,7 @@
     $st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
     $st->execute();
     $current_user = $st->fetch(PDO::FETCH_ASSOC);
-    // echo $current_user['fullname'];
-    
+
     ?>
     <header class="header">
         <div class="header-content">
@@ -219,16 +218,14 @@
             <div class='row mb-5'>
                 <div class='col-md-8 col-xl-6 text-center mx-auto'>
                     <h2>Quizz</h2>
-                    <p class='w-lg-50'>Curae hendrerit donec commodo hendrerit egestas tempus, turpis facilisis nostra
+                    <!-- <p class='w-lg-50'>Curae hendrerit donec commodo hendrerit egestas tempus, turpis facilisis nostra
                         nunc.
-                        Vestibulum dui eget ultrices.</p>
+                        Vestibulum dui eget ultrices.</p> -->
                     <a href='../Quizz/NewQuizz/NewQuizz.php' style='color: black;'><i class='fa-solid fa-plus'></i><span
                             style='margin-left: 10px'>Thêm Quizz</span></a>
                 </div>
             </div>
-            <!-- <div class='container py-4 py-xl-5'> -->
             <div class='row '>
-
                 <!-- get list quizz -->
                 <?php
                 $quizzs = $connect->prepare("SELECT * FROM quizz");
@@ -242,9 +239,7 @@
                     <button type='submit' name='btn' class='btn'>
 
                       <div class='card' style='width: 18rem'>
-                        <!-- <a href=''>
                       <img src='' class='card-img-top' alt='...' />
-                  </a> -->
                         <div class='card-body'>
 
                               <h5 class='card-title'>" . $quizz['name'] . "</h5>
@@ -267,7 +262,6 @@
 
                 ?>
 
-                <!-- </div> -->
             </div>
         </div>
     </div>

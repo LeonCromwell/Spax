@@ -1,3 +1,55 @@
+<?php
+session_start();
+if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_email'])) {
+    header('Location: ../Login/Login.php');
+    exit;
+}
+// get quizzkey
+// echo $_SESSION['quizzkey'];
+
+//Connect db
+$servername = "localhost";
+$dbname = 'php';
+$username = 'mailyhai';
+$password = '992003hai';
+try {
+    $connect = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+    $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    // echo 'Connect successfully';
+} catch (PDOException $e) {
+    echo "Connection falied: " . $e->getMessage();
+}
+
+
+//get current user
+$current_user_email = $_SESSION['current_user_email'];
+$st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
+$st->execute();
+$current_user = $st->fetch(PDO::FETCH_ASSOC);
+
+if (isset($_POST['submit'])) {
+    $name = $_POST['name'];
+    $level = $_POST['level'];
+    $description = $_POST['description'];
+    $time = $_POST['time'];
+    $userId = $current_user['id_user'];
+
+
+    // $sql = "INSERT INTO quizz (name, level, desc) VALUES ('$name', '$level', '$description')";
+    $st = $connect->prepare("INSERT INTO quizz (name, level, `desc`, time, user_id) VALUES ('$name', '$level', '$description', '$time', '$userId')");
+    if ($st->execute()) {
+        // echo "<p style='color: green'>Đăng kí thành công</p>";
+        header("Location: ../../Home");
+    } else {
+        echo 'Đăng kí thất bại';
+    }
+
+
+
+}
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -15,6 +67,7 @@
 </head>
 
 <body>
+
     <header class="header">
         <div class="header-content">
             <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
@@ -43,7 +96,7 @@
                                 <a class='nav-link dropdown-toggle' href='#' role='button' data-bs-toggle='dropdown'
                                     aria-expanded='false'>
                                     <i class="fa-solid fa-user"></i>
-                                    Mai Lý Hải
+                                    <?php echo $current_user['fullname'] ?>
                                 </a>
                                 <ul class='dropdown-menu'>
                                     <li>
@@ -102,22 +155,15 @@
                         placeholder='Enter Level' value="<?php echo isset($_POST['level']) ? $_POST['level'] : '' ?>" />
                 </div>
                 <div class='mb-3'>
+                    <label for='exampleFormControlInput4' class='form-label'>Thời gian (phút)</label>
+                    <input type='text' name='time' class='form-control' id='exampleFormControlInput4'
+                        placeholder='Enter Time' value="<?php echo isset($_POST['time']) ? $_POST['time'] : '' ?>" />
+                </div>
+                <div class='mb-3'>
                     <label for='exampleFormControlTextarea4' class='form-label'>Description</label>
                     <textarea class='form-control' name='description' id='exampleFormControlTextarea4'
                         rows='3'><?php echo isset($_POST['description']) ? $_POST['description'] : '' ?></textarea>
                 </div>
-                <!-- <div class='mb-3 '>
-                    <div class='mb-3'>
-                        <label for='exampleFormControlInput2' class='form-label'>Number of questions</label>
-                        <input type='text' name='numquestion' class='form-control' id='exampleFormControlInput2'
-                            placeholder='Enter number of questions'
-                            value=" />
-                    </div>
-
-                    <input type='submit' class='btn btn-primary' name='addQuestions' value='Thêm câu hỏi' />
-
-                </div> -->
-
 
                 <button type='submit' name="submit" class='btn btn-primary'>Thêm Quizz</button>
                 <button type='submit' name="retype" class='btn btn-primary'>Đặt lại</button>
@@ -125,20 +171,6 @@
         </div>
     </div>
 
-
-    <?php
-    if (isset($_POST['submit'])) {
-        $name = $_POST['name'];
-        $level = $_POST['level'];
-        $description = $_POST['description'];
-        $numquestion = $_POST['numquestion'];
-
-
-    }
-
-
-
-    ?>
 </body>
 
 </html>

@@ -128,16 +128,10 @@
                     ?>
                     <p>Thời gian: &nbsp;
                     <div id="countdown"></div>
-
-
-
-
                     </p>
-
                     <button class="btn btn-primary" id="startCountDown" type="submit" data-bs-toggle="collapse"
                         data-bs-target="#quizz">Bắt
                         đầu làm bài</button>
-
                     <?php
                     // khi ấn vào button startCountDown thì thời gian bắt đầu đếm ngược
                     //sử dụng js vì php phải refresh lại trang rất nhiều lần
@@ -145,7 +139,7 @@
 
                     echo <<<EOD
                         <script type="text/javascript">
-                            var duration = $minutes * 60 * 1000; // 15 phút trong mili giây
+                            var duration = $minutes * 60 * 1000; 
                             var countDownBtn = document.getElementById("startCountDown");
                             var x;
                             countDownBtn.addEventListener("click", e => {
@@ -174,14 +168,16 @@
                     <?php
                     if (isset($current_user['role']) && $current_user['role'] == 'admin') {
                         echo " <a href='#' class='btn btn-primary' data-bs-toggle='collapse' data-bs-target='#quizz'>Thêm Câu hỏi</a>";
+                    } else if (isset($current_user['id_user']) && $current_user['id_user'] == $quizz['user_id']) {
+                        echo " <a href='#' class='btn btn-primary' data-bs-toggle='collapse' data-bs-target='#quizz'>Thêm Câu hỏi</a>";
                     }
                     ?>
 
-
+                    <!-- in ra câu hỏi và đáp án -->
                     <?php
                     // lấy danh sách các câu hỏi của quizz 
                     
-                    $ques = $connect->prepare("SELECT * FROM question WHERE ma_khoa_hoc = '$quizzKey'");
+                    $ques = $connect->prepare("SELECT * FROM question WHERE quizz_id = '$quizzKey'");
                     $ques->execute();
                     $questions = $ques->fetchAll(PDO::FETCH_ASSOC);
 
@@ -194,9 +190,15 @@
 
                         echo "
                             <div class='card collapse mt-5 item' id='quizz'>
-                            <div class='card-header'>Câu " . $key + 1 . "</div>
-                            <div class='card-body'>
-                            ";
+                            <div class='card-header'>Câu " . $key + 1 . "
+                                ";
+                        if (isset($current_user['role']) && $current_user['role'] == 'admin') {
+                            echo "<button class='btn btn-danger mr-0'>Xóa</button>";
+                        }
+                        echo "
+                        </div>
+                        <div class='card-body'>
+                        ";
                         if (isset($question['image']) && !empty($question['image'])) {
                             echo "<img src='" . $question['image'] . "' class='card-img-top' alt='Câu " . $key + 1 . "'>";
                         }
@@ -216,7 +218,9 @@
                         echo "</p>
                            
                             </div>
+
                         </div>
+
                             ";
                     }
 
