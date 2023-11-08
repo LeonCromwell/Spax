@@ -56,6 +56,7 @@ a {
     height: 50px;
 }
 
+
 .nav-item {
     display: flex;
     justify-content: center;
@@ -71,3 +72,6 @@ a {
     font-size: 18px;
 }
 
+div#question{
+    text-align: left;
+}

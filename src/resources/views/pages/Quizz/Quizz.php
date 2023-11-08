@@ -12,34 +12,21 @@
         crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/772918bb67.js" crossorigin="anonymous"></script>
     <title>Quizz</title>
-    <style>
-        .item {
-            text-align: left;
-        }
-    </style>
+
 </head>
 
 <body>
     <?php
+    require('../../../../../util/db/index.php');
+    include_once('../../layouts/partials/index.php');
+    //connect db
+    $connect = Connect();
+
+
     session_start();
     if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_email'])) {
-        header('Location: ../Login/Login.php');
+        header('Location: ../../Login/Login.php');
         exit;
-    }
-    // get quizzkey
-    // echo $_SESSION['quizzkey'];
-    
-    //Connect db
-    $servername = "localhost";
-    $dbname = 'php';
-    $username = 'mailyhai';
-    $password = '992003hai';
-    try {
-        $connect = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-        $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        // echo 'Connect successfully';
-    } catch (PDOException $e) {
-        echo "Connection falied: " . $e->getMessage();
     }
 
     //get current user
@@ -48,77 +35,17 @@
     $st->execute();
     $current_user = $st->fetch(PDO::FETCH_ASSOC);
 
+    //header
+    PartialHeader($current_user['fullname']);
+
     ?>
-    <header class="header">
-        <div class="header-content">
-            <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
-                <div class='container'>
-                    <a class='navbar-brand' style="color: #fff" href='../Home'>
-                        <img class="header-logo" src="../assets/Image/logo.png" alt="logo">
 
-                    </a>
-
-
-                    <div id='navbarSupportedContent'>
-                        <ul class='navbar-nav ml-auto nav-item'>
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/Congngheweb/Courses">
-                                    <i class="fa-brands fa-discourse"></i>
-                                    Khóa học</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <i class="fa-solid fa-scroll"></i>
-                                    Kì thi</a>
-                            </li>
-
-                            <li class='nav-item dropdown'>
-
-                                <a class='nav-link dropdown-toggle' href='#' role='button' data-bs-toggle='dropdown'
-                                    aria-expanded='false'>
-                                    <i class="fa-solid fa-user"></i>
-                                    <?php echo $current_user['fullname'] ?>
-                                </a>
-                                <ul class='dropdown-menu'>
-                                    <li>
-
-                                        <a class='dropdown-item' href='#'>Thêm Khóa Học</a>
-                                    </li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='#'>Khóa học của tôi</a></li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='../Quizz/NewQuizz/NewQuizz.php'>Thêm Quizz</a>
-                                    </li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='#'>Đổi mật khẩu</a></li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='../Login/Login.php'>Đăng xuất</a></li>
-                                </ul>
-                            </li>
-
-                        </ul>
-
-                    </div>
-                </div>
-            </nav>
-
-        </div>
-    </header>
 
     <div class="content">
         <div class='container py-4 py-xl-5'>
-
             <div class="card">
-
                 <div class="card-body text-center">
+                    <!-- Tên quizz -->
                     <?php
                     $quizzKey = $_SESSION['quizzkey'];
                     $quizz = $connect->prepare("SELECT * FROM quizz WHERE id = '$quizzKey'");
@@ -129,9 +56,18 @@
                     <p>Thời gian: &nbsp;
                     <div id="countdown"></div>
                     </p>
-                    <button class="btn btn-primary" id="startCountDown" type="submit" data-bs-toggle="collapse"
-                        data-bs-target="#quizz">Bắt
-                        đầu làm bài</button>
+                    <form action="" method="post">
+                        <input class="btn btn-primary" name="start" id="startCountDown" type="submit"
+                            data-bs-toggle="collapse" data-bs-target="#question" value="Bắt đầu làm bài" />
+
+                        <?php
+                        if (isset($current_user['role']) && $current_user['role'] == 'admin') {
+                            echo " <a href='#' class='btn btn-primary'>Thêm Câu hỏi</a>";
+                        } else if (isset($current_user['id_user']) && $current_user['id_user'] == $quizz['user_id']) {
+                            echo " <a href='#' class='btn btn-primary'>Thêm Câu hỏi</a>";
+                        }
+                        ?>
+                    </form>
                     <?php
                     // khi ấn vào button startCountDown thì thời gian bắt đầu đếm ngược
                     //sử dụng js vì php phải refresh lại trang rất nhiều lần
@@ -142,6 +78,7 @@
                             var duration = $minutes * 60 * 1000; 
                             var countDownBtn = document.getElementById("startCountDown");
                             var x;
+                            
                             countDownBtn.addEventListener("click", e => {
                             e.preventDefault();
 
@@ -162,51 +99,37 @@
                         });
                         </script>
                         EOD;
-
-                    ?>
-
-                    <?php
-                    if (isset($current_user['role']) && $current_user['role'] == 'admin') {
-                        echo " <a href='#' class='btn btn-primary' data-bs-toggle='collapse' data-bs-target='#quizz'>Thêm Câu hỏi</a>";
-                    } else if (isset($current_user['id_user']) && $current_user['id_user'] == $quizz['user_id']) {
-                        echo " <a href='#' class='btn btn-primary' data-bs-toggle='collapse' data-bs-target='#quizz'>Thêm Câu hỏi</a>";
-                    }
-                    ?>
-
-                    <!-- in ra câu hỏi và đáp án -->
-                    <?php
+                    // in ra câu hỏi và đáp án
                     // lấy danh sách các câu hỏi của quizz 
-                    
                     $ques = $connect->prepare("SELECT * FROM question WHERE quizz_id = '$quizzKey'");
                     $ques->execute();
                     $questions = $ques->fetchAll(PDO::FETCH_ASSOC);
 
-                    //lấy list đáp án của từng câu hỏi
-                    foreach ($questions as $key => $question) {
-                        $question_id = $question['id'];
-                        $ans = $connect->prepare("SELECT * FROM answer WHERE ma_cau_hoi = '$question_id'");
-                        $ans->execute();
-                        $answers = $ans->fetchAll(PDO::FETCH_ASSOC);
+                    $numberQuestion = count($questions);
 
-                        echo "
-                            <div class='card collapse mt-5 item' id='quizz'>
+                    if ($numberQuestion == 0) {
+                        echo "<div style='color: red'>Chưa có câu hỏi!</div>";
+                    } else {
+                        //lấy list đáp án của từng câu hỏi
+                        foreach ($questions as $key => $question) {
+                            $question_id = $question['id'];
+                            $ans = $connect->prepare("SELECT * FROM answer WHERE question_id = '$question_id'");
+                            $ans->execute();
+                            $answers = $ans->fetchAll(PDO::FETCH_ASSOC);
+                            echo "
+                            <div class='card collapse mt-5 item' id='question' style='text-align: left;'>
                             <div class='card-header'>Câu " . $key + 1 . "
-                                ";
-                        if (isset($current_user['role']) && $current_user['role'] == 'admin') {
-                            echo "<button class='btn btn-danger mr-0'>Xóa</button>";
-                        }
-                        echo "
-                        </div>
-                        <div class='card-body'>
+                            </div>
+                            <div class='card-body'>
                         ";
-                        if (isset($question['image']) && !empty($question['image'])) {
-                            echo "<img src='" . $question['image'] . "' class='card-img-top' alt='Câu " . $key + 1 . "'>";
-                        }
-                        echo "
+                            if (isset($question['image']) && !empty($question['image'])) {
+                                echo "<img src='" . $question['image'] . "' class='card-img-top' alt='Câu " . $key + 1 . "'>";
+                            }
+                            echo "
                             <h5 class='card-title'>" . $question['ques'] . "</h5>
                             <p class='card-text'>";
-                        foreach ($answers as $key => $answer) {
-                            echo "
+                            foreach ($answers as $key => $answer) {
+                                echo "
                             <div class='form-check'>
                             <input class='form-check-input' type='radio' name='flexRadioDefault' id='flexRadioDefault1'>
                             <label class='form-check-label' for='flexRadioDefault1'>
@@ -214,34 +137,25 @@
                             </label>
                           </div>
                             ";
-                        }
-                        echo "</p>
-                           
+                            }
+                            echo "</p>
                             </div>
-
                         </div>
-
                             ";
+                        }
                     }
-
                     ?>
 
                 </div>
             </div>
-
-
-
         </div>
-
     </div>
-
-
 
     <footer class='text-center py-4'>
         <div class='container'>
             <div class='row row-cols-1 row-cols-lg-3'>
                 <div class='col'>
-                    <p class='text-muted my-2'>Copyright © 2023 Spax Viet Nam</p>
+                    <p class='text-muted my-2'>Copyright © 2023 Spax Viet Nam</p>
                 </div>
                 <div class='col'>
                     <ul class='list-inline my-2'>

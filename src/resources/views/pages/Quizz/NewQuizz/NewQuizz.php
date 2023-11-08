@@ -1,4 +1,8 @@
 <?php
+require('../../../../../util/db/index.php');
+include_once('../../layouts/partials/index.php');
+//connect db
+$connect = Connect();
 session_start();
 if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_email'])) {
     header('Location: ../Login/Login.php');
@@ -7,18 +11,7 @@ if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_ema
 // get quizzkey
 // echo $_SESSION['quizzkey'];
 
-//Connect db
-$servername = "localhost";
-$dbname = 'php';
-$username = 'mailyhai';
-$password = '992003hai';
-try {
-    $connect = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-    $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    // echo 'Connect successfully';
-} catch (PDOException $e) {
-    echo "Connection falied: " . $e->getMessage();
-}
+
 
 
 //get current user
