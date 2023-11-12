@@ -1,3 +1,10 @@
+<?php
+include_once("../../../../../util/db/index.php");
+include_once('../../layouts/partials/index.php');
+
+//gọi hàm connect db
+Connect();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -111,7 +118,7 @@
 
 <body>
     <?php
-    session_start();
+    // session_start();
     //handle detail when click quizz
     if (isset($_GET['btn'])) {
         $quizzkey = $_GET['quizzkey'];
@@ -127,27 +134,13 @@
     // echo $_SESSION['quizzkey'];
     // echo $_SESSION['current_user_email'];
     
-    //Connect db
-    $servername = "localhost";
-    $dbname = 'php';
-    $username = 'mailyhai';
-    $password = '992003hai';
-    try {
-        $connect = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-        $connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        // echo 'Connect successfully';
-    } catch (PDOException $e) {
-        echo "Connection falied: " . $e->getMessage();
-    }
 
-    //get current user
-    $current_user_email = $_SESSION['current_user_email'];
-    $st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
-    $st->execute();
-    $current_user = $st->fetch(PDO::FETCH_ASSOC);
 
-    include_once('../../layouts/partials/index.php');
-    PartialHeader($current_user['fullname']);
+
+
+    //gọi component header
+    $partial = new Partials();
+    $partial->PartialHeader();
     ?>
 
 
@@ -197,7 +190,8 @@
 
 
     <?php
-    PartialFooter();
+    //gọi component footer
+    $partial->PartialFooter();
     ?>
 </body>
 

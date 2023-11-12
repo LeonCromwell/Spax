@@ -1,43 +1,67 @@
 <?php
 
+include_once("../../../../../util/db/index.php");
 
-function PartialHeader($current_user)
+// $connect = Connect();
+
+session_start();
+
+class Partials
 {
-    echo <<<EOD
+    private $connect;
+
+
+    function setConnect($connect)
+    {
+        $this->connect = $connect;
+    }
+    function getConnect()
+    {
+        return $this->connect;
+    }
+
+    public function get_current_user()
+    {
+        //get current user
+        $this->setConnect(Connect());
+        $connect = $this->getConnect();
+        $current_user_email = $_SESSION['current_user_email'];
+        $st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
+        $st->execute();
+        $current_user = $st->fetch(PDO::FETCH_ASSOC);
+        return $current_user;
+    }
+    public function PartialHeader()
+    {
+        $current_user = $this->get_current_user()['fullname'];
+
+        // Nối biến bên ngoài cú pháp heredoc
+        $headerContent = <<<EOD
         <header class="header"> 
-        <div class="header-content">
-            <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
-                <div class='container'>
-                    <a class='navbar-brand' style="color: #fff" href='/Congngheweb/src/resources/views/pages/Home'>
-                        <img class="header-logo" src="../../../../public/assets/Image/logo.png" alt="logo">
-
-                    </a>
-
-
-                    <div id='navbarSupportedContent'>
-                        <ul class='navbar-nav ml-auto nav-item'>
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/Congngheweb/Courses">
-                                    <i class="fa-brands fa-discourse"></i>
-                                    Khóa học</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <i class="fa-solid fa-scroll"></i>
-                                    Kì thi</a>
-                            </li>
-
-                            <li class='nav-item dropdown'>
-
-                                <a class='nav-link dropdown-toggle' href='#' role='button' data-bs-toggle='dropdown'
-                                    aria-expanded='false'>
-                                    <i class="fa-solid fa-user"></i>
-                                    $current_user
-                                </a>
-                                <ul class='dropdown-menu'>
+            <div class="header-content">
+                <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
+                    <div class='container'>
+                        <a class='navbar-brand' style="color: #fff" href='/Congngheweb/src/resources/views/pages/Home'>
+                            <img class="header-logo" src="../../../../public/assets/Image/logo.png" alt="logo">
+                        </a>
+    
+                        <div id='navbarSupportedContent'>
+                            <ul class='navbar-nav ml-auto nav-item'>
+                                <li class="nav-item">
+                                    <a class="nav-link active" aria-current="page" href="/Congngheweb/Courses">
+                                        <i class="fa-brands fa-discourse"></i>
+                                        Khóa học</a>
+                                </li>
+                                <!-- ... (phần còn lại của mã của bạn) ... -->
+                                <li class='nav-item dropdown'>
+                                    <a class='nav-link dropdown-toggle' href='#' role='button' data-bs-toggle='dropdown'
+                                        aria-expanded='false'>
+                                        <i class="fa-solid fa-user"></i>
+                                        $current_user
+                                    </a>
+                                    <ul class='dropdown-menu'>
                                     <li>
-
-                                        <a class='dropdown-item' href='#'>Thêm Khóa Học</a>
+                                    <a class='dropdown-item' href='#'>Thêm Khóa Học</a>
                                     </li>
                                     <li>
                                         <hr class='dropdown-divider' />
@@ -56,25 +80,25 @@ function PartialHeader($current_user)
                                         <hr class='dropdown-divider' />
                                     </li>
                                     <li><a class='dropdown-item' href='../Login/Login.php'>Đăng xuất</a></li>
-                                </ul>
-                            </li>
-
-                        </ul>
-
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </div>
-            </nav>
+                </nav>
+            </div>
+        </header>
+        EOD;
 
-        </div>
-    </header>
-    EOD;
-    return 0;
-}
+        echo $headerContent;
+        return 0;
+    }
 
-function PartialFooter()
-{
-    echo <<<EOD
-    <footer class='text-center py-4'>
+
+    public function PartialFooter()
+    {
+        $footerContent = <<<EOD
+        <footer class='text-center py-4'>
         <div class='container'>
             <div class='row row-cols-1 row-cols-lg-3'>
                 <div class='col'>
@@ -121,5 +145,8 @@ function PartialFooter()
         </div>
     </footer>
 EOD;
+        echo $footerContent;
+        return 0;
+    }
 }
 ?>
