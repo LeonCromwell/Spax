@@ -20,6 +20,7 @@ class HomeController
     {
         $this->setConnect(Connect());
         $connect = $this->getConnect();
+
         $quizzs = $connect->prepare("SELECT * FROM quizz");
         $quizzs->execute();
         $list_quizz = $quizzs->fetchAll(PDO::FETCH_ASSOC);

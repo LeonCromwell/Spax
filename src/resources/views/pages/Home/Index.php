@@ -1,5 +1,5 @@
 <?php
-include_once("../../../../../util/db/index.php");
+// include_once("../../../../../util/db/index.php");
 include_once('../../layouts/partials/index.php');
 include_once('../../../../app/controller/homeController.php');
 
