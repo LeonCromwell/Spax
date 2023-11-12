@@ -1,9 +1,10 @@
 <?php
-include_once("../../../../util/db/index.php");
+// vì đã gọi db trong header rồi nên không cần gọi lại
+// include_once("../../../../util/db/index.php");
 
 class HomeController
 {
-    private $connect = Connect();
+    private $connect;
 
     function setConnect($connect)
     {
@@ -17,14 +18,33 @@ class HomeController
 
     public function show()
     {
-        $connect = Connect();
-        $st = $connect->prepare("SELECT * FROM user");
-        $st->execute();
-        $users = $st->fetchAll(PDO::FETCH_ASSOC);
-        include_once('../../layouts/partials/index.php');
-        include_once('../../resources/views/pages/Home/Index.php');
+        $this->setConnect(Connect());
+        $connect = $this->getConnect();
+        $quizzs = $connect->prepare("SELECT * FROM quizz");
+        $quizzs->execute();
+        $list_quizz = $quizzs->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($list_quizz as $quizz) {
+            echo "
+            <div class='col-sm-6 col-lg-4 mt-4'>
+            <form method='GET'>
+            <input type='hidden' name='quizzkey' value='" . $quizz['id'] . "'>
+            <button type='submit' name='btn' class='btn'>
+                <div class='card' style='width: 18rem'>
+                <div class='card-body'>
+                        <h5 class='card-title'>" . $quizz['name'] . "</h5>
+                    <p>Level: " . $quizz['level'] . "</p>
+                    <p class='card-text card-desc'>" . $quizz['desc'] . "</p>
+                    
+                </div>
+                </div>
+                </button>
+
+            </form>
+            </div>
+            ";
+        }
     }
-    
+
 }
 
 

@@ -1,6 +1,7 @@
 <?php
 include_once("../../../../../util/db/index.php");
 include_once('../../layouts/partials/index.php');
+include_once('../../../../app/controller/homeController.php');
 
 //gọi hàm connect db
 Connect();
@@ -140,6 +141,9 @@ Connect();
 
     //gọi component header
     $partial = new Partials();
+    $homeController = new HomeController();
+
+
     $partial->PartialHeader();
     ?>
 
@@ -159,29 +163,7 @@ Connect();
             <div class='row '>
                 <!-- get list quizz -->
                 <?php
-                $quizzs = $connect->prepare("SELECT * FROM quizz");
-                $quizzs->execute();
-                $list_quizz = $quizzs->fetchAll(PDO::FETCH_ASSOC);
-                foreach ($list_quizz as $quizz) {
-                    echo "
-                    <div class='col-sm-6 col-lg-4 mt-4'>
-                    <form method='GET'>
-                    <input type='hidden' name='quizzkey' value='" . $quizz['id'] . "'>
-                    <button type='submit' name='btn' class='btn'>
-                      <div class='card' style='width: 18rem'>
-                        <div class='card-body'>
-                              <h5 class='card-title'>" . $quizz['name'] . "</h5>
-                          <p>Level: " . $quizz['level'] . "</p>
-                          <p class='card-text card-desc'>" . $quizz['desc'] . "</p>
-                         
-                        </div>
-                      </div>
-                      </button>
-
-                    </form>
-                  </div>
-                    ";
-                }
+                $homeController->show();
                 ?>
 
             </div>
