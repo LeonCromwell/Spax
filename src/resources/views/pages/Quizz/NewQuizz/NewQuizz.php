@@ -1,43 +1,18 @@
 <?php
-require('../../../../../util/db/index.php');
-include_once('../../layouts/partials/index.php');
-//connect db
-$connect = Connect();
-session_start();
-if (!isset($_SESSION['current_user_email']) || empty($_SESSION['current_user_email'])) {
-    header('Location: ../Login/Login.php');
-    exit;
-}
-// get quizzkey
-// echo $_SESSION['quizzkey'];
+include_once('../../../layouts/partials/index.php');
+include_once('../../../../../app/controller/newQuizzController.php');
 
-
-
-
-//get current user
-$current_user_email = $_SESSION['current_user_email'];
-$st = $connect->prepare("SELECT * FROM user WHERE email = '$current_user_email'");
-$st->execute();
-$current_user = $st->fetch(PDO::FETCH_ASSOC);
-
+$partial = new Partials();
 if (isset($_POST['submit'])) {
     $name = $_POST['name'];
     $level = $_POST['level'];
     $description = $_POST['description'];
     $time = $_POST['time'];
-    $userId = $current_user['id_user'];
+    $userId = $partial->get_current_user()['id_user'];
 
+    $newQuizz = new NewQuizzController($name, $level, $description, $time, $userId);
 
-    // $sql = "INSERT INTO quizz (name, level, desc) VALUES ('$name', '$level', '$description')";
-    $st = $connect->prepare("INSERT INTO quizz (name, level, `desc`, time, user_id) VALUES ('$name', '$level', '$description', '$time', '$userId')");
-    if ($st->execute()) {
-        // echo "<p style='color: green'>Đăng kí thành công</p>";
-        header("Location: ../../Home");
-    } else {
-        echo 'Đăng kí thất bại';
-    }
-
-
+    $newQuizz->NewQuizz();
 
 }
 
@@ -61,73 +36,13 @@ if (isset($_POST['submit'])) {
 
 <body>
 
-    <header class="header">
-        <div class="header-content">
-            <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
-                <div class='container'>
-                    <a class='navbar-brand' style="color: #fff" href='../../Home/Index.php'>
-                        <img class="header-logo" src="../..//assets/Image/logo.png" alt="logo">
-
-                    </a>
-
-
-                    <div id='navbarSupportedContent'>
-                        <ul class='navbar-nav ml-auto nav-item'>
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="page" href="/Congngheweb/Courses">
-                                    <i class="fa-brands fa-discourse"></i>
-                                    Khóa học</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="#">
-                                    <i class="fa-solid fa-scroll"></i>
-                                    Kì thi</a>
-                            </li>
-
-                            <li class='nav-item dropdown'>
-
-                                <a class='nav-link dropdown-toggle' href='#' role='button' data-bs-toggle='dropdown'
-                                    aria-expanded='false'>
-                                    <i class="fa-solid fa-user"></i>
-                                    <?php echo $current_user['fullname'] ?>
-                                </a>
-                                <ul class='dropdown-menu'>
-                                    <li>
-
-                                        <a class='dropdown-item' href='#'>Thêm Khóa Học</a>
-                                    </li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='#'>Khóa học của tôi</a></li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='#'>Thêm Quizz</a></li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='#'>Đổi mật khẩu</a></li>
-                                    <li>
-                                        <hr class='dropdown-divider' />
-                                    </li>
-                                    <li><a class='dropdown-item' href='../../Login/Login.php'>Đăng xuất</a></li>
-                                </ul>
-                            </li>
-
-                        </ul>
-
-                    </div>
-                </div>
-            </nav>
-
-        </div>
-    </header>
+    <?php
+    $partial->PartialHeader();
+    ?>
 
     <div class="content">
         <?php
         if (isset($_POST['retype'])) {
-
             header("Location: NewQuizz.php");
         }
         ?>

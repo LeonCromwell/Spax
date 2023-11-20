@@ -1,6 +1,7 @@
 <?php
+$rootPath = $_SERVER['DOCUMENT_ROOT'];
 
-include_once("../../../../../util/db/index.php");
+include_once($rootPath . "\Congngheweb\util\db\index.php");
 
 // $connect = Connect();
 
@@ -33,16 +34,17 @@ class Partials
     }
     public function PartialHeader()
     {
+        global $rootPath;
         $current_user = $this->get_current_user()['fullname'];
 
-        // Nối biến bên ngoài cú pháp heredoc
+        //cú pháp heredoc
         $headerContent = <<<EOD
         <header class="header"> 
             <div class="header-content">
                 <nav class='navbar navbar-expand-lg nav bg-body-tertiary'>
                     <div class='container'>
                         <a class='navbar-brand' style="color: #fff" href='/Congngheweb/src/resources/views/pages/Home'>
-                            <img class="header-logo" src="../../../../public/assets/Image/logo.png" alt="logo">
+                            <img class="header-logo" src="\Congngheweb\src\public\assets\Image\logo.png" alt="logo">
                         </a>
     
                         <div id='navbarSupportedContent'>
@@ -66,7 +68,7 @@ class Partials
                                     <li>
                                         <hr class='dropdown-divider' />
                                     </li>
-                                    <li><a class='dropdown-item' href='#'>Khóa học của tôi</a></li>
+                                    <li><a class='dropdown-item' href='#'>Quizz đã đăng</a></li>
                                     <li>
                                         <hr class='dropdown-divider' />
                                     </li>
